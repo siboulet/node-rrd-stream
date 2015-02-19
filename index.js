@@ -66,6 +66,8 @@ RRDStream.prototype._transform = function(chunk, encoding, done) {
 
   // Parse each row
   while (this.buffer.length >= 8 * this.header.ds_cnt) {
+    console.assert(this.rra_index <= this.best_rra.index);
+
     if (!this.rra) {
       this.rra = new RRDRRA(this.header, this.rra_index);
 
@@ -81,6 +83,8 @@ RRDStream.prototype._transform = function(chunk, encoding, done) {
         }).bind(this));
 
         this.rra.on('end', (function() {
+          // Ignore remaining buffer
+          this.buffer.length = 0;
           this.end();
         }).bind(this));
       }
