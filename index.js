@@ -184,7 +184,7 @@ function RRDRRA(header, rra_index) {
 
   extend(this, header.rra[rra_index]);
 
-  this.row_count = 0;
+  this.row_count = 0; // Number of rows processed so far
   this.buffered_rows = [];
   this.step = this.pdp_per_row * header.step;
   this.end = parseInt(header.last_update / this.step) * this.step;
@@ -197,17 +197,21 @@ util.inherits(RRDRRA, EventEmitter);
 RRDRRA.prototype.push = function(row) {
   console.assert(row.length === this.cdp_prep.length * 8);
   console.assert(this.row_count < this.rows);
-  this.row_count++;
 
   var values = {};
   for (var i = 0; i < this.cdp_prep.length; i++)
     values[this.ds[i].name] = row.readDoubleLE(i * 8);
 
-  if (this.buffered_rows.length <= this.cur_row)
-    return this.buffered_rows.push(values);
+  if (this.row_count > this.cur_row) {
+    // Immediately emit all rows after cur_row
+    this.emit('row', this.timestamp, values);
+    this.timestamp += this.step;
+  } else {
+    // Buffer all rows up to and including cur_row
+    this.buffered_rows.push(values);
+  }
 
-  this.emit('row', this.timestamp, values);
-  this.timestamp += this.step;
+  this.row_count++;
 
   // Reached end of RRA
   if (this.row_count === this.rows) {
