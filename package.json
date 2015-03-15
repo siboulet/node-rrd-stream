@@ -1,6 +1,6 @@
 {
   "name": "rrd-stream",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Node.js library for streaming RRD file",
   "author": "Simon Boulet <simon@nostalgeek.com>",
   "repository": {
