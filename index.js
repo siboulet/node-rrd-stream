@@ -32,8 +32,13 @@ util.inherits(RRDStream, Transform);
 RRDStream.prototype._transform = function(chunk, encoding, done) {
   this.buffer = Buffer.concat([this.buffer, chunk]);
 
-  if (!this.header && this.buffer.length >= 128)
-    this.header = new RRDHeader(this.buffer.slice(0, 128));
+  if (!this.header && this.buffer.length >= 128) {
+    try {
+      this.header = new RRDHeader(this.buffer.slice(0, 128));
+    } catch (e) {
+      this.emit('error', e);
+    }
+  }
 
   if (this.header && !this.header.ds && this.buffer.length >= this.header.header_size) {
     this.header.parse(this.buffer.slice(0, this.header.header_size));
@@ -106,14 +111,14 @@ function RRDHeader(data) {
   console.assert(data.length === 128);
 
   if (data.slice(0,3).toString() !== RRD_COOKIE)
-    return this.emit('error', 'Not an RRD file');
+    throw new Error('Not an RRD file');
 
   this.version = data.slice(4,8).toString();
   if (this.version !== RRD_VERSION)
-    return this.emit('error', 'Unsupported RRD version');
+    throw new Error('Unsupported RRD version');
 
   if (data.readDoubleLE(16) !== FLOAT_COOKIE)
-    return this.emit('error', 'Unsupported platform');
+    throw new Error('Unsupported platform');
 
   this.ds_cnt = data.readUInt32LE(24);
   this.rra_cnt = data.readUInt32LE(32);
