@@ -6,5 +6,11 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/siboulet/node-rrd-stream"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^2.3.4"
   }
 }
