@@ -16,10 +16,9 @@ var RRDStream = module.exports = function(options) {
 
   Transform.call(this);
 
-  this.buffer = Buffer('');
+  this.buffer = new Buffer(0);
   this.rra_index = 0;
 
-  // Default to last 24h
   this.options = extend({
     // Default to last 24h
     start: Date.now()/1000 - 86400,
@@ -70,7 +69,7 @@ RRDStream.prototype._transform = function(chunk, encoding, done) {
     return done();
 
   // Parse each row
-  while (this.buffer.length >= 8 * this.header.ds_cnt) {
+  while (this.buffer && this.buffer.length >= 8 * this.header.ds_cnt) {
     console.assert(this.rra_index <= this.best_rra.index);
 
     if (!this.rra) {
@@ -89,7 +88,7 @@ RRDStream.prototype._transform = function(chunk, encoding, done) {
 
         this.rra.on('end', (function() {
           // Ignore remaining buffer
-          this.buffer.length = 0;
+          this.buffer = new Buffer(0);
           this.end();
         }).bind(this));
       }
