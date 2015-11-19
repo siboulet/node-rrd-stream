@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/siboulet/node-rrd-stream.svg?branch=master)](https://travis-ci.org/siboulet/node-rrd-stream)
+
 # node-rrd-stream
 **Node.js library for streaming RRD file**
 
